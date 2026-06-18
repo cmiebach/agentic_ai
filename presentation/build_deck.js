@@ -43,7 +43,10 @@ function card(s, x, y, w, h, fill) {
   });
   s.addText([{ text: "agenticai.srv1487908.hstgr.cloud", options: { color: PRIMARYL, bold: true } },
     { text: "    ·    github.com/cmiebach/agentic_ai", options: { color: MUTED } }],
-    { x: M+0.2, y: 5.7, w: 12, h: 0.4, fontFace: BODY, fontSize: 13 });
+    { x: M+0.2, y: 5.6, w: 12, h: 0.4, fontFace: BODY, fontSize: 13 });
+  s.addText([{ text: "TEAM   ", options: { color: PRIMARY, bold: true, charSpacing: 2 } },
+    { text: "Ricardo · Antonio · Max · Caspar · Nicklas", options: { color: TEXT } }],
+    { x: M+0.2, y: 6.2, w: 12, h: 0.4, fontFace: BODY, fontSize: 14 });
 }
 
 /* 2 CHALLENGE */

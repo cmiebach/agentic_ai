@@ -311,6 +311,11 @@ def analyze_workspace(ws: dict, focus: str = "", deep: bool = False) -> dict:
     deep=True  → Analyst → Risk-Strategist crew (multi-agent, ~1-2 min).
     deep=False → single-pass briefing (fast, ~30-45s). Default.
     """
+    # Control Tower = a 4-agent crew with NATIVE tool-calling (its own demo path).
+    if ws.get("source") == "control_tower":
+        from .control_tower import run_control_tower
+        return run_control_tower()
+
     focus = (focus or "").strip()
     if focus:
         allowed, reason = guard_topic(focus)

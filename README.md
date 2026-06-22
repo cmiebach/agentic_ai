@@ -13,6 +13,9 @@ simulated logistics-risk layer:
   PurchId/VendorAccount…) and a clearly-labelled handshake. Prod path: env `SAP_BASE_URL`
   / `ODOO_URL` / `DYNAMICS_URL`.
 - **Synthetic dataset** (`app/dataset.py`, seeded, reproducible) — one click, risk baked in.
+- **Control Tower** (`app/control_tower.py`) — a 4-agent crew with **native CrewAI tool-calling**
+  over fragmented sources (EDI + emails + spreadsheet), surfacing a planted Tier-2 concentration
+  risk. Runs as a background job on glm-5.1. (Idea credit: teammate Ricardo Lievano.)
 
 **Logistics risk** (`app/logistics.py`, simulated) — in-transit shipments by mode
 (Sea/Air/Road/Rail) with weather risk, port congestion, delay probability, value-in-transit

@@ -11,7 +11,9 @@ FastAPI web app — supply-chain risk console.
 
 import asyncio
 import os
+import threading
 import time
+import uuid
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request, HTTPException, UploadFile, File
@@ -43,6 +45,22 @@ app = FastAPI(title="Agentic AI Lab — Supply Chain Crew")
 
 # Only one crew runs at a time (queues concurrent users; bounds cost).
 _crew_lock = asyncio.Lock()
+
+# Control Tower runs as a background job (4-agent tool-calling crew takes minutes).
+_ct_jobs: dict = {}          # job_id -> {status: running|done|error, result, backend, error}
+_ct_lock = threading.Lock()
+
+
+def _run_ct_job(job_id: str) -> None:
+    from .control_tower import run_control_tower
+    try:
+        data = run_control_tower()
+        ws.set_analysis(data["result"])
+        with _ct_lock:
+            _ct_jobs[job_id] = {"status": "done", "result": data["result"], "backend": data["backend"]}
+    except Exception as exc:
+        with _ct_lock:
+            _ct_jobs[job_id] = {"status": "error", "error": f"{type(exc).__name__}: {exc}"}
 
 # Brute-force protection: lock an IP for 10 min after 6 failed logins in 5 min.
 _login_guard = LoginGuard(max_fails=6, window=300, lockout=600)
@@ -162,6 +180,43 @@ async def workspace_state(request: Request):
 async def source_synthetic(request: Request, n: int = 12):
     _require_auth(request)
     return JSONResponse(_load_source(synthetic_source(n=n)))
+
+
+@app.get("/sources/control-tower")
+async def source_control_tower(request: Request):
+    """Load the fragmented multi-source feed for the Control Tower agentic demo.
+    Running analysis on it triggers the 4-agent native-tool-calling crew."""
+    _require_auth(request)
+    from .control_tower import ct_source
+    ws.set_workspace(ct_source())
+    return JSONResponse(_public_workspace(ws.get_workspace()))
+
+
+@app.post("/control-tower/start")
+async def ct_start(request: Request):
+    """Kick off the 4-agent Control Tower crew as a background job; returns a job id to poll."""
+    _require_auth(request)
+    if ws.get_workspace().get("source") != "control_tower":
+        return JSONResponse({"ok": False, "error": "Load the Control Tower source first."}, status_code=400)
+    with _ct_lock:
+        for jid, j in _ct_jobs.items():
+            if j.get("status") == "running":
+                return JSONResponse({"ok": True, "job_id": jid})
+        jid = uuid.uuid4().hex[:12]
+        _ct_jobs.clear()                 # keep only the latest job
+        _ct_jobs[jid] = {"status": "running"}
+    threading.Thread(target=_run_ct_job, args=(jid,), daemon=True).start()
+    return JSONResponse({"ok": True, "job_id": jid})
+
+
+@app.get("/control-tower/status")
+async def ct_status(request: Request, job_id: str):
+    _require_auth(request)
+    with _ct_lock:
+        j = _ct_jobs.get(job_id)
+    if not j:
+        return JSONResponse({"ok": False, "error": "unknown job"}, status_code=404)
+    return JSONResponse({"ok": True, **j})
 
 
 @app.post("/sources/upload")

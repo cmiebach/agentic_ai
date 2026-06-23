@@ -285,6 +285,13 @@ async def analyze(request: Request, focus: str = Form(""), deep: bool = Form(Fal
     return JSONResponse({"ok": True, "result": data["result"], "backend": data["backend"]})
 
 
+@app.post("/chat/clear")
+async def chat_clear(request: Request):
+    _require_auth(request)
+    ws.clear_chat()
+    return JSONResponse({"ok": True})
+
+
 @app.post("/chat")
 async def chat(request: Request, message: str = Form(...)):
     _require_auth(request)

@@ -55,6 +55,11 @@ def append_chat(role: str, content: str) -> None:
         _WS["chat"] = _WS["chat"][-CHAT_CAP:]
 
 
+def clear_chat() -> None:
+    with _lock:
+        _WS["chat"] = []
+
+
 def is_loaded() -> bool:
     with _lock:
         return bool(_WS.get("loaded"))

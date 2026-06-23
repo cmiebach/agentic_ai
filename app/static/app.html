@@ -50,11 +50,14 @@
   .md table { border-collapse:collapse;width:100%;margin:.5rem 0;font-size:12px; }
   .md th,.md td { border:1px solid #1f2a3a;padding:4px 8px; }
   .md code { background:#0d0d15;padding:1px 5px;border-radius:4px;font-size:12px; }
-  /* Chat panel is narrow: shrink text, and let any tables scroll instead of squishing. */
-  #chatLog .md p,#chatLog .md li { font-size:13px; }
-  #chatLog .md table { display:block; width:max-content; max-width:100%; overflow-x:auto; font-size:10.5px; white-space:nowrap; }
-  #chatLog .md th,#chatLog .md td { padding:2px 6px; }
-  #chatLog .bubble { overflow-x:auto; }
+  /* Chat: comfortable prose; tables render small and fit the (resizable) panel. */
+  #chatLog .md p,#chatLog .md li { font-size:13.5px; line-height:1.62; }
+  #chatLog .md p { margin:.4rem 0; }
+  #chatLog .md ul { margin:.35rem 0; }
+  #chatLog .md table { width:100%; font-size:11px; border-collapse:collapse; }
+  #chatLog .md th,#chatLog .md td { padding:3px 6px; border:1px solid #1f2a3a; }
+  #chatResizer { width:6px; cursor:col-resize; flex-shrink:0; background:transparent; transition:background .15s; }
+  #chatResizer:hover, #chatResizer.dragging { background:rgba(139,141,255,.45); }
   .rred { color:#ffb4ab; } .ramber { color:#ffb783; } .rgreen { color:#4ade80; }
   tr.t-red td { background:rgba(147,0,10,.16); } tr.t-amber td { background:rgba(217,119,33,.12); }
 </style>
@@ -131,11 +134,15 @@
       <div id="content" class="hidden space-y-5 max-w-[1100px]"></div>
     </main>
 
-    <!-- Right chat panel -->
-    <aside class="w-[340px] shrink-0 bg-surface border-l border-outline-variant flex flex-col min-h-0">
+    <!-- Drag handle to resize the chat panel -->
+    <div id="chatResizer" title="Drag to resize chat"></div>
+
+    <!-- Right chat panel (resizable) -->
+    <aside id="chatPanel" style="width:400px" class="shrink-0 bg-surface border-l border-outline-variant flex flex-col min-h-0">
       <div class="h-14 shrink-0 flex items-center gap-2.5 px-4 border-b border-outline-variant">
         <span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
-        <div><div class="text-headline-sm">Ask the Agent</div><div class="text-label-sm text-tertiary font-mono">Q&amp;A + re-analysis</div></div>
+        <div class="flex-1"><div class="text-headline-sm">Ask the Agent</div><div class="text-label-sm text-tertiary font-mono">Q&amp;A + re-analysis</div></div>
+        <button onclick="clearChat()" title="Clear chat" class="material-symbols-outlined text-outline hover:text-error text-[20px] p-1">delete_sweep</button>
       </div>
       <div id="chatLog" class="flex-1 overflow-y-auto sb p-3 space-y-3"></div>
       <div class="shrink-0 p-3 border-t border-outline-variant">
@@ -224,6 +231,13 @@
         if (s.status === 'error') { alert('Control Tower error: ' + (s.error || '')); break; }
       }
     } finally { setBusy(false); }
+  }
+
+  async function clearChat() {
+    if (!confirm('Clear the chat for everyone?')) return;
+    try { await api('/chat/clear', { method: 'POST' }); } catch (e) {}
+    $('chatLog').innerHTML = '';
+    if (WS) WS.chat = [];
   }
 
   async function sendChat() {
@@ -356,6 +370,19 @@
         <span class="text-headline-sm">Intelligence Briefing</span><span class="ml-auto text-label-sm text-on-surface-variant font-mono">⚙︎ ${esc(WS.backend || '')}</span></div>
       <div class="md">${md(WS.analysis_md)}</div></div>`;
   }
+
+  // Drag the handle to resize the chat panel (so answers get more room).
+  (function initChatResize() {
+    const resizer = $('chatResizer'), panel = $('chatPanel');
+    if (!resizer || !panel) return;
+    let dragging = false;
+    resizer.addEventListener('mousedown', e => { dragging = true; resizer.classList.add('dragging'); document.body.style.userSelect = 'none'; e.preventDefault(); });
+    window.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      panel.style.width = Math.min(780, Math.max(300, window.innerWidth - e.clientX)) + 'px';
+    });
+    window.addEventListener('mouseup', () => { if (!dragging) return; dragging = false; resizer.classList.remove('dragging'); document.body.style.userSelect = ''; });
+  })();
 
   (async () => { const w = await api('/workspace'); if (w && w.loaded) { WS = w; renderWorkspace(); } })();
 </script>

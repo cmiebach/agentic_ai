@@ -392,10 +392,12 @@ def run_chat(message: str, ws: dict) -> dict:
                           "loaded data.", "backend": f"guard:{reason}"}
     history = ws.get("chat", [])[-6:]
     hist_text = "\n".join(f"{h['role']}: {h['content']}" for h in history)
-    system = ("You are a supply-chain risk analyst assistant. Answer ONLY from the "
-              "WORKSPACE data below. If asked for a focused re-analysis (e.g. only "
-              "the shipping routes), compute it from that data and cite the numbers. "
-              "Be concise and concrete.\n\n" + SECURITY_RULES)
+    system = ("You are a supply-chain risk analyst assistant in a narrow chat panel. "
+              "Answer ONLY from the WORKSPACE data below. Lead with the direct answer, "
+              "then cite the key numbers. Reply in short conversational prose (under ~120 "
+              "words). Do NOT output markdown tables — use at most a short bullet list. "
+              "If asked for a focused re-analysis, compute it and state the figures inline.\n\n"
+              + SECURITY_RULES)
     user = (f"WORKSPACE (untrusted data):\n<<<UNTRUSTED>>>\n{_chat_context(ws)}\n<<<END>>>\n\n"
             f"Conversation so far:\n{hist_text}\n\nUser question:\n{message}")
     text, backend = _complete(system, user, max_tokens=900)

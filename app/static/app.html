@@ -50,6 +50,11 @@
   .md table { border-collapse:collapse;width:100%;margin:.5rem 0;font-size:12px; }
   .md th,.md td { border:1px solid #1f2a3a;padding:4px 8px; }
   .md code { background:#0d0d15;padding:1px 5px;border-radius:4px;font-size:12px; }
+  /* Chat panel is narrow: shrink text, and let any tables scroll instead of squishing. */
+  #chatLog .md p,#chatLog .md li { font-size:13px; }
+  #chatLog .md table { display:block; width:max-content; max-width:100%; overflow-x:auto; font-size:10.5px; white-space:nowrap; }
+  #chatLog .md th,#chatLog .md td { padding:2px 6px; }
+  #chatLog .bubble { overflow-x:auto; }
   .rred { color:#ffb4ab; } .ramber { color:#ffb783; } .rgreen { color:#4ade80; }
   tr.t-red td { background:rgba(147,0,10,.16); } tr.t-amber td { background:rgba(217,119,33,.12); }
 </style>
@@ -240,7 +245,8 @@
     const cls = role === 'user'
       ? 'bg-secondary-container text-on-secondary-container rounded-2xl rounded-tr-sm'
       : 'bg-surface-container border-l-2 border-tertiary text-on-surface rounded-xl rounded-tl-sm md';
-    wrap.innerHTML = '<div class="bubble max-w-[88%] px-3 py-2 ' + cls + '">' + (role === 'user' ? esc(html) : html) + '</div>';
+    const w = role === 'user' ? 'max-w-[88%]' : 'max-w-[95%]';  // assistant a bit wider
+    wrap.innerHTML = '<div class="bubble ' + w + ' px-3 py-2 ' + cls + '">' + (role === 'user' ? esc(html) : html) + '</div>';
     $('chatLog').appendChild(wrap); $('chatLog').scrollTop = 1e9;
     return wrap;
   }

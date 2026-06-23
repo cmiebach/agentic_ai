@@ -177,9 +177,10 @@ async def workspace_state(request: Request):
 
 
 @app.get("/sources/synthetic")
-async def source_synthetic(request: Request, n: int = 12):
+async def source_synthetic(request: Request, n: int = 12, seed: int | None = None):
+    """seed=None → random (a new dataset); seed=N → reproduce the exact same dataset."""
     _require_auth(request)
-    return JSONResponse(_load_source(synthetic_source(n=n)))
+    return JSONResponse(_load_source(synthetic_source(seed=seed, n=n)))
 
 
 @app.get("/sources/control-tower")

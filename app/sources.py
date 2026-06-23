@@ -22,7 +22,9 @@ MAX_FETCH_BYTES = 25 * 1024 * 1024
 PUBLIC_DATASETS = {
     "usaid": {
         "label": "USAID Supply Chain Shipment Pricing",
-        "url": "https://data.usaid.gov/api/views/a3rc-nmf6/rows.csv?accessType=DOWNLOAD",
+        # data.usaid.gov was taken offline (USAID wound down), so we point at a
+        # stable public GitHub mirror of the same dataset (~7.9k shipment rows).
+        "url": "https://raw.githubusercontent.com/ritusantra/Supply-Chain-Shipment-Price-Data-Analysis/main/SCM.csv",
         "filename": "usaid_shipment_pricing.csv",
     },
 }

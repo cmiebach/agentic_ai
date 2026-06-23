@@ -7,3 +7,7 @@ __pycache__/
 
 # Office lock/temp files
 ~$*
+
+# Presentation (kept local, not on GitHub)
+Supply_Chain_Risk_Console.pptx
+presentation/

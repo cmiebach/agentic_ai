@@ -189,15 +189,45 @@ function card(s, x, y, w, h, fill) {
   card(s, M, 4.4, 5.9, 1.7, CARD);
   s.addText("Engines", { x: M+0.25, y: 4.55, w: 5, h: 0.35, fontFace: HEAD, fontSize: 14, color: PRIMARYL, bold: true });
   s.addText([
-    { text: "Primary: Ollama kimi-k2.7-code (on the VPS, fast, uncapped)", options: { bullet: true, breakLine: true } },
-    { text: "Automatic fallback: Google Gemini 2.5 Flash-Lite", options: { bullet: true } },
+    { text: "Primary: Ollama on the VPS — kimi-k2.7-code (fast) + glm-5.1 (tool-calling). No quota wall.", options: { bullet: true, breakLine: true } },
+    { text: "Automatic fallback: Google Gemini (2 free keys)", options: { bullet: true } },
   ], { x: M+0.25, y: 4.95, w: 5.4, h: 1.0, fontFace: BODY, fontSize: 12.5, color: TEXT, paraSpaceAfter: 6, lineSpacing: 17 });
   card(s, M+6.2, 4.4, 5.9, 1.7, CARD);
   s.addText("Guardrails", { x: M+6.45, y: 4.55, w: 5, h: 0.35, fontFace: HEAD, fontSize: 14, color: GREEN, bold: true });
   s.addText([
     { text: "Prompt-injection & scope guard; untrusted data isolated", options: { bullet: true, breakLine: true } },
-    { text: "Agents have no tools/secrets — injection can’t take actions", options: { bullet: true } },
+    { text: "Agents' tools are read-only & no secrets — injection can’t take real-world actions", options: { bullet: true } },
   ], { x: M+6.45, y: 4.95, w: 5.4, h: 1.0, fontFace: BODY, fontSize: 12.5, color: TEXT, paraSpaceAfter: 6, lineSpacing: 17 });
+  pageNum(s);
+}
+
+/* 7b CONTROL TOWER — true agentic tool-calling */
+{
+  const s = slide();
+  heading(s, "True agentic tool-use", "Control Tower — a 4-agent crew that calls tools");
+  const agents = ["1 · Aggregator", "2 · Tier-2 Analyst", "3 · Forecaster", "4 · Mitigation Planner"];
+  const cw = 2.72, gap = 0.36, y0 = 1.95;
+  agents.forEach((a, i) => {
+    const x = M + i * (cw + gap);
+    s.addShape(p.shapes.ROUNDED_RECTANGLE, { x, y: y0, w: cw, h: 0.95, rectRadius: 0.1, fill: { color: PANEL }, line: { color: PRIMARY, width: 1 }, shadow: sh() });
+    s.addText(a, { x: x + 0.08, y: y0, w: cw - 0.16, h: 0.95, fontFace: HEAD, fontSize: 14, color: PRIMARYL, bold: true, align: "center", valign: "middle" });
+    if (i < 3) s.addText("→", { x: x + cw + 0.01, y: y0, w: 0.34, h: 0.95, fontFace: HEAD, fontSize: 20, color: PRIMARY, align: "center", valign: "middle" });
+  });
+  s.addText([
+    { text: "Each agent autonomously CALLS TOOLS", options: { color: TEXT, bold: true } },
+    { text: " to read fragmented sources — EDI feed · supplier emails · spreadsheet — exactly how CrewAI agents are meant to work.", options: { color: MUTED } },
+  ], { x: M, y: 3.2, w: 12.1, h: 0.6, fontFace: BODY, fontSize: 14.5, valign: "top", lineSpacing: 20 });
+  card(s, M, 4.05, 12.1, 2.05, PANEL);
+  s.addShape(p.shapes.RECTANGLE, { x: M, y: 4.05, w: 0.14, h: 2.05, fill: { color: AMBER } });
+  s.addText("Hidden risk the agents surfaced — invisible in any single source", { x: M + 0.4, y: 4.25, w: 11.4, h: 0.4, fontFace: HEAD, fontSize: 16, color: AMBER, bold: true });
+  s.addText([
+    { text: "Nippon Steel Alloys", options: { color: TEXT, bold: true } },
+    { text: " is one Tier-2 alloy mill secretly feeding ", options: { color: MUTED } },
+    { text: "both ACME Bearings and Pacific Hydraulics", options: { color: TEXT, bold: true } },
+    { text: ". A single outage there halts two production lines at a combined ", options: { color: MUTED } },
+    { text: "$225,000/day", options: { color: GREEN, bold: true } },
+    { text: " — a concentration risk no one spotted across the silos.", options: { color: MUTED } },
+  ], { x: M + 0.4, y: 4.78, w: 11.4, h: 1.2, fontFace: BODY, fontSize: 15, valign: "top", lineSpacing: 22 });
   pageNum(s);
 }
 
